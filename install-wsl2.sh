@@ -18,7 +18,7 @@ sudo apt install -y python3 python3-pip python3-venv nodejs npm git wget build-e
 
 # Clonar repositório Suna
 echo -e "${YELLOW}[3/8] Clonando repositório Suna...${NC}"
-git clone https://github.com/88atman77/suna-local-setup.git /opt/suna/repo
+git clone https://github.com/felipemassignan/suna-local-wsl2.git /opt/suna/repo
 cp -r /opt/suna/repo/backend /opt/suna/
 cp -r /opt/suna/repo/frontend /opt/suna/
 
