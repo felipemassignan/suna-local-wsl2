@@ -1,130 +1,409 @@
-# Suna Local Setup
+# SUNA Local WSL2 Setup
 
-A complete, 100% local implementation of the [Suna AI agent framework](https://github.com/kortix-ai/suna) that runs entirely on your own hardware without any external API dependencies. This system replaces all cloud services with local alternatives, centered around a Mistral 7B model served via llama.cpp.
+Uma implementação completamente local do framework de agente de IA SUNA, adaptada especificamente para rodar no WSL2 do Windows. Este sistema substitui todas as dependências de nuvem por alternativas locais, utilizando o modelo Mistral 7B via llama.cpp e banco de dados SQLite.
 
-## Features
+## 🎯 Características Principais
 
-- **Completely offline operation** - no external API dependencies whatsoever
-- Uses Mistral 7B Instruct model via llama.cpp for local AI capabilities
-- Replaces all cloud services with local alternatives:
-  - Local LLM instead of OpenAI
-  - Local FAISS vector store for document retrieval
-  - Local mock search instead of Tavily
-  - Local mock image generation
-  - Local authentication instead of Supabase
-  - Local file storage instead of cloud storage
-- Optimized for CPU-only operation with minimal resource usage
-- Bypasses authentication and database requirements in LOCAL mode
-- Includes systemd service files for all components
-- Provides scripts for easy installation and management
+- **Operação 100% offline** - sem dependências de APIs externas
+- **Otimizado para WSL2** - configuração específica para Windows Subsystem for Linux 2
+- **Modelo Mistral 7B local** via llama.cpp com API compatível com OpenAI
+- **Banco de dados SQLite** substituindo Supabase
+- **Autenticação local** sem necessidade de serviços externos
+- **Vector store local** usando FAISS para busca semântica
+- **Interface web completa** com frontend Next.js
+- **Ferramentas locais** substituindo APIs externas (busca, geração de imagem, etc.)
 
-## Requirements
+## 📋 Requisitos do Sistema
 
-- Linux VDS with at least 2 CPU cores and 16GB RAM
-- At least 10GB of free disk space
-- No GPU required
+### Hardware Mínimo
+- **CPU**: 4 cores (recomendado 8+ cores)
+- **RAM**: 16GB (recomendado 32GB)
+- **Armazenamento**: 20GB livres
+- **GPU**: Não necessária (otimizado para CPU)
 
-## Quick Start
+### Software
+- **Windows 10/11** com WSL2 habilitado
+- **Ubuntu 20.04+** no WSL2
+- **Python 3.8+**
+- **Node.js 18+**
+- **Git**
 
-1. Clone this repository:
+## 🚀 Instalação Rápida
+
+### 1. Preparar o WSL2
+
 ```bash
-git clone https://github.com/88atman77/suna-local-setup.git
-cd suna-local-setup
+# No PowerShell como Administrador
+wsl --install Ubuntu
+wsl --set-default-version 2
 ```
 
-2. Run the installation script:
+### 2. Clonar o Repositório
+
 ```bash
-sudo ./install.sh
+# No terminal WSL2
+git clone <este-repositorio>
+cd suna-wsl2-setup
 ```
 
-3. Start the services:
+### 3. Executar Instalação
+
 ```bash
-sudo ./start-suna.sh
+# Executar como usuário normal (não root)
+./install-wsl2.sh
 ```
 
-4. Access the Suna UI at http://your-server-ip:3000
+### 4. Iniciar o Sistema
 
-## Components
-
-- **llama.cpp server**: Serves the Mistral 7B model with an OpenAI-compatible API
-- **FAISS vector store**: Local vector database for document retrieval and semantic search
-- **Suna backend**: Modified to use local endpoints and bypass database requirements
-- **Suna frontend**: Modified to bypass authentication in LOCAL mode
-- **Redis server**: Required for agent run streaming
-- **Mock services**: Local implementations for web search and image generation
-
-## Configuration
-
-All configuration is handled automatically by the installation script. The main configuration files are:
-
-- `/etc/suna/backend/.env`: Backend configuration
-- `/etc/suna/frontend/.env.local`: Frontend configuration
-- `/etc/systemd/system/suna-*.service`: Systemd service files
-
-## Scripts
-
-- `install.sh`: Main installation script
-- `start-suna.sh`: Start all Suna services
-- `stop-suna.sh`: Stop all Suna services
-- `scripts/download_model.sh`: Download the Mistral 7B model
-- `scripts/setup_environment.sh`: Set up the Python environment
-- `scripts/start_llama_server.sh`: Start the llama.cpp server
-- `scripts/test_llama_server.py`: Test the llama.cpp server
-
-## Patches
-
-The repository includes patches for the Suna codebase to make it work in a completely local environment:
-
-- `files/backend/thread_manager.py.patch`: Modify thread manager to work without a database
-- `files/backend/api.py.patch`: Modify agent API to work in LOCAL mode
-- `files/backend/local_search.py`: Replace external API tools with local alternatives
-
-## Performance Optimization
-
-The system is optimized for CPU-only operation with minimal resource usage:
-
-- Mistral 7B model is quantized to 4-bit precision (Q4_K_M)
-- llama.cpp is configured to use OpenBLAS for better CPU performance
-- Redis is configured with minimal memory usage
-- Systemd services are configured for automatic restart and dependency management
-
-## Troubleshooting
-
-### Services Not Starting
-
-Check the status of services:
 ```bash
-systemctl status suna-llama.service
-systemctl status suna-backend.service
-systemctl status suna-frontend.service
+cd ~/suna-local
+./start-suna.sh
 ```
 
-View logs:
-```bash
-journalctl -u suna-llama.service -n 50
-journalctl -u suna-backend.service -n 50
+### 5. Acessar a Interface
+
+- **Frontend**: http://localhost:3000
+- **API Backend**: http://localhost:8080
+- **API Llama**: http://localhost:8000
+
+## 📁 Estrutura do Projeto
+
+```
+~/suna-local/
+├── backend/                 # Backend FastAPI
+│   ├── agent/              # Lógica do agente
+│   ├── services/           # Serviços locais
+│   └── utils/              # Utilitários
+├── frontend/               # Frontend Next.js
+├── models/                 # Modelos de IA
+│   └── mistral-7b-instruct-v0.2.Q4_K_M.gguf
+├── data/                   # Dados locais
+│   ├── sqlite/            # Banco SQLite
+│   ├── vector_store/      # Vector store FAISS
+│   └── logs/              # Logs do sistema
+├── venv/                   # Ambiente virtual Python
+└── scripts/                # Scripts de controle
 ```
 
-### High Memory Usage
+## 🔧 Configuração Avançada
 
-If the system is running out of memory:
-1. Reduce the Redis memory limit
-2. Use a more quantized model (Q2_K instead of Q4_K)
-3. Reduce the context size in llama.cpp server
+### Variáveis de Ambiente
 
-### Slow Response Times
+O sistema usa as seguintes variáveis de ambiente principais:
 
-If responses are too slow:
-1. Adjust the number of threads based on your CPU
-2. Consider using a smaller model if necessary
+```bash
+# Backend (.env)
+ENV_MODE=LOCAL
+OPENAI_API_KEY=sk-dummy-key
+OPENAI_API_BASE=http://localhost:8000/v1
+SQLITE_DB_PATH=./data/sqlite/suna.db
+VECTOR_STORE_PATH=./data/vector_store
+REDIS_URL=redis://localhost:6379
 
-## License
+# Frontend (.env.local)
+NEXT_PUBLIC_API_URL=http://localhost:8080
+ENV_MODE=LOCAL
+```
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### Configuração do Modelo
 
-## Acknowledgements
+Para usar um modelo diferente:
 
-- [Suna AI](https://github.com/kortix-ai/suna) - The original AI agent framework
-- [llama.cpp](https://github.com/ggerganov/llama.cpp) - Efficient inference of LLaMA models
-- [Mistral AI](https://mistral.ai/) - Creators of the Mistral 7B model
-- [FAISS](https://github.com/facebookresearch/faiss) - Vector similarity search library
+1. Baixe o modelo GGUF desejado
+2. Coloque em `~/suna-local/models/`
+3. Edite `start-llama.sh` para apontar para o novo modelo
+4. Ajuste `MODEL_FILE` em `backend/.env`
+
+### Configuração de Performance
+
+Para otimizar performance:
+
+```bash
+# Editar start-llama.sh
+python -m llama_cpp.server \
+    --model ./models/seu-modelo.gguf \
+    --n_threads $(nproc) \        # Usar todos os cores
+    --n_ctx 4096 \                # Contexto maior
+    --n_batch 512                 # Batch maior
+```
+
+## 🧪 Testes
+
+### Suite de Testes Automatizada
+
+```bash
+# Executar todos os testes
+python test_suite.py
+
+# Testar diretório específico
+python test_suite.py /caminho/para/suna-local
+```
+
+### Testes Manuais
+
+#### 1. Testar Servidor Llama
+```bash
+cd ~/suna-local/backend
+python test_llama_server.py
+```
+
+#### 2. Testar Backend
+```bash
+curl http://localhost:8080/health
+```
+
+#### 3. Testar Frontend
+```bash
+curl http://localhost:3000
+```
+
+## 🛠️ Solução de Problemas
+
+### Problemas Comuns
+
+#### 1. Servidor Llama não inicia
+```bash
+# Verificar logs
+tail -f ~/suna-local/data/logs/llama.log
+
+# Verificar modelo
+ls -la ~/suna-local/models/
+
+# Testar manualmente
+cd ~/suna-local
+source venv/bin/activate
+python -m llama_cpp.server --model ./models/mistral-7b-instruct-v0.2.Q4_K_M.gguf --host 0.0.0.0 --port 8000
+```
+
+#### 2. Backend não conecta ao Llama
+```bash
+# Verificar se Llama está rodando
+curl http://localhost:8000/v1/models
+
+# Verificar logs do backend
+tail -f ~/suna-local/data/logs/backend.log
+```
+
+#### 3. Frontend não carrega
+```bash
+# Verificar se backend está rodando
+curl http://localhost:8080/health
+
+# Verificar logs do frontend
+cd ~/suna-local/frontend
+npm run dev
+```
+
+#### 4. Erro de memória
+```bash
+# Reduzir contexto do modelo
+# Editar start-llama.sh: --n_ctx 2048
+
+# Usar modelo menor
+# Baixar versão Q2_K em vez de Q4_K_M
+```
+
+### Logs e Diagnóstico
+
+```bash
+# Ver todos os logs
+tail -f ~/suna-local/data/logs/*.log
+
+# Verificar processos
+ps aux | grep -E "(llama|uvicorn|node)"
+
+# Verificar portas
+netstat -tlnp | grep -E "(8000|8080|3000|6379)"
+
+# Testar Redis
+redis-cli ping
+```
+
+## 🔄 Controle do Sistema
+
+### Scripts de Controle
+
+```bash
+# Iniciar todos os serviços
+./start-suna.sh
+
+# Parar todos os serviços
+./stop-suna.sh
+
+# Iniciar serviços individuais
+./start-llama.sh      # Apenas Llama
+./start-backend.sh    # Apenas Backend
+./start-frontend.sh   # Apenas Frontend
+./start-redis.sh      # Apenas Redis
+```
+
+### Monitoramento
+
+```bash
+# Verificar status dos serviços
+ps aux | grep -E "(llama_cpp|uvicorn|node|redis)"
+
+# Verificar uso de recursos
+htop
+
+# Verificar logs em tempo real
+tail -f ~/suna-local/data/logs/llama.log
+tail -f ~/suna-local/data/logs/backend.log
+```
+
+## 🔧 Desenvolvimento
+
+### Modificar o Backend
+
+```bash
+cd ~/suna-local/backend
+source ../venv/bin/activate
+
+# Editar código
+nano agent/run.py
+
+# Reiniciar backend
+pkill -f "uvicorn.*api:app"
+./start-backend.sh
+```
+
+### Modificar o Frontend
+
+```bash
+cd ~/suna-local/frontend
+
+# Editar código
+nano src/pages/index.tsx
+
+# O frontend recarrega automaticamente em modo dev
+```
+
+### Adicionar Novas Ferramentas
+
+1. Criar nova ferramenta em `backend/agent/tools/`
+2. Registrar em `backend/agent/run.py`
+3. Testar com `python test_suite.py`
+
+## 📊 Performance e Otimização
+
+### Benchmarks Típicos
+
+| Componente | Tempo de Inicialização | Uso de RAM | Uso de CPU |
+|------------|----------------------|------------|------------|
+| Llama Server | 30-60s | 4-8GB | 50-100% |
+| Backend | 5-10s | 200-500MB | 5-15% |
+| Frontend | 10-20s | 100-300MB | 5-10% |
+| Redis | 1-2s | 50-100MB | 1-5% |
+
+### Otimizações
+
+#### Para Sistemas com Pouca RAM
+```bash
+# Usar modelo menor
+wget -O ~/suna-local/models/mistral-7b-q2.gguf \
+  "https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/mistral-7b-instruct-v0.2.Q2_K.gguf"
+
+# Reduzir contexto
+# Editar start-llama.sh: --n_ctx 2048
+```
+
+#### Para Sistemas com Muitos Cores
+```bash
+# Aumentar threads
+# Editar start-llama.sh: --n_threads 16
+
+# Aumentar batch size
+# Editar start-llama.sh: --n_batch 1024
+```
+
+## 🔐 Segurança
+
+### Configurações de Segurança
+
+- **Autenticação local**: Sistema de tokens JWT local
+- **Isolamento**: Todos os serviços rodam localmente
+- **Dados**: Todos os dados ficam no sistema local
+- **Rede**: Sem comunicação externa necessária
+
+### Backup e Recuperação
+
+```bash
+# Backup dos dados
+tar -czf suna-backup-$(date +%Y%m%d).tar.gz ~/suna-local/data/
+
+# Backup da configuração
+cp ~/suna-local/backend/.env ~/suna-local/backend/.env.backup
+cp ~/suna-local/frontend/.env.local ~/suna-local/frontend/.env.local.backup
+
+# Restaurar dados
+tar -xzf suna-backup-YYYYMMDD.tar.gz -C ~/
+```
+
+## 🆕 Atualizações
+
+### Atualizar o Sistema
+
+```bash
+# Parar serviços
+./stop-suna.sh
+
+# Fazer backup
+tar -czf suna-backup-$(date +%Y%m%d).tar.gz ~/suna-local/data/
+
+# Atualizar código
+git pull origin main
+
+# Aplicar patches
+python backend-patches/apply_patches.py ~/suna-local/backend ./backend-patches/
+
+# Reinstalar dependências se necessário
+cd ~/suna-local/backend
+source ../venv/bin/activate
+pip install -r requirements.txt
+
+cd ../frontend
+npm install
+
+# Reiniciar serviços
+./start-suna.sh
+```
+
+## 🤝 Contribuição
+
+### Reportar Problemas
+
+1. Execute `python test_suite.py` e inclua os resultados
+2. Inclua logs relevantes de `~/suna-local/data/logs/`
+3. Descreva o ambiente (WSL2, Ubuntu version, hardware)
+
+### Desenvolvimento
+
+1. Fork o repositório
+2. Crie uma branch para sua feature
+3. Teste com `python test_suite.py`
+4. Submeta um pull request
+
+## 📄 Licença
+
+Este projeto é licenciado sob a Licença MIT - veja o arquivo LICENSE para detalhes.
+
+## 🙏 Agradecimentos
+
+- [SUNA AI](https://github.com/kortix-ai/suna) - Framework original
+- [llama.cpp](https://github.com/ggerganov/llama.cpp) - Inferência eficiente de modelos LLaMA
+- [Mistral AI](https://mistral.ai/) - Modelo Mistral 7B
+- [FAISS](https://github.com/facebookresearch/faiss) - Biblioteca de busca vetorial
+
+## 📞 Suporte
+
+Para suporte técnico:
+
+1. Consulte a seção de Solução de Problemas
+2. Execute a suite de testes: `python test_suite.py`
+3. Verifique os logs em `~/suna-local/data/logs/`
+4. Abra uma issue no repositório com informações detalhadas
+
+---
+
+**Desenvolvido por Manus AI** - Adaptação local do SUNA para WSL2
+
