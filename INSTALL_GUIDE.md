@@ -57,7 +57,7 @@ sudo apt install -y curl wget git build-essential
 
 ```bash
 # Clonar o repositório
-git clone <url-do-repositorio> ~/suna-wsl2-setup
+git clone https://github.com/felipemassignan/suna-local-wsl2.git ~/suna-wsl2-setup
 cd ~/suna-wsl2-setup
 
 # Verificar conteúdo
